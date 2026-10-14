@@ -1,21 +1,11 @@
-using System;
-using System.Collections.Generic;
-
-class Doctor
+class Patient
 {
     public string Name { get; }
-    public string Specialty { get; }
-    public List<string> Treated { get; } = new();
+    public int Severity { get; }          // 1 - найтерміновіше, 5 - найлегше
 
-    public Doctor(string name, string specialty)
+    public Patient(string name, int severity)
     {
         Name = name;
-        Specialty = specialty;
-    }
-
-    public void Treat(Patient patient)
-    {
-        Treated.Add(patient.Name);
-        Console.WriteLine($"Лікар {Name} ({Specialty}): прийом {patient.Name}, пріоритет {patient.Severity}");
+        Severity = severity;
     }
 }
