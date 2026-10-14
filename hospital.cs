@@ -16,7 +16,7 @@ class Hospital
 
     public void Register(Patient patient)
     {
-        if (patient.Severity < 1  patient.Severity > 5)
+        if (patient.Severity < 1 ||patient.Severity > 5)
         {
             Console.WriteLine($"{patient.Name}: некоректний пріоритет");
             return;
@@ -32,7 +32,7 @@ class Hospital
     public void ProcessNext()
     {
         var patient = emergency.TakeNext();
-        if (patient == null  doctors.Count == 0) return;
+        if (patient == null || doctors.Count == 0) return;
 
         var doctor = doctors.Dequeue();
         doctor.Treat(patient);
