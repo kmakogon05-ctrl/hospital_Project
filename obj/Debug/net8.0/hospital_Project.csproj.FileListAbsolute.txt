@@ -1,0 +1,15 @@
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\bin\Debug\net8.0\hospital_Project.exe
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\bin\Debug\net8.0\hospital_Project.deps.json
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\bin\Debug\net8.0\hospital_Project.runtimeconfig.json
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\bin\Debug\net8.0\hospital_Project.dll
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\bin\Debug\net8.0\hospital_Project.pdb
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\obj\Debug\net8.0\hospital_Project.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\obj\Debug\net8.0\hospital_Project.AssemblyInfoInputs.cache
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\obj\Debug\net8.0\hospital_Project.AssemblyInfo.cs
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\obj\Debug\net8.0\hospital_Project.csproj.CoreCompileInputs.cache
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\obj\Debug\net8.0\hospital_Project.sourcelink.json
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\obj\Debug\net8.0\hospital_Project.dll
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\obj\Debug\net8.0\refint\hospital_Project.dll
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\obj\Debug\net8.0\hospital_Project.pdb
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\obj\Debug\net8.0\hospital_Project.genruntimeconfig.cache
+C:\Users\Lenovo\OneDrive\Documentos\GitHub\hospital_Project\hospital_Project\obj\Debug\net8.0\ref\hospital_Project.dll
