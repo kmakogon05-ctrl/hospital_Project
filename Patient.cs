@@ -1,11 +1,9 @@
-class Patient
+class Patient : Person
 {
-    public string Name { get; }
-    public int Severity { get; }          // 1 - найтерміновіше, 5 - найлегше
+    public int Severity { get; }
 
-    public Patient(string name, int severity)
+    public Patient(string name, int severity) : base(name)
     {
-        Name = name;
         Severity = severity;
     }
 }

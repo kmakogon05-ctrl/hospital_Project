@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
 
-class Doctor
+class Doctor : Person
 {
-    public string Name { get; }
     public string Specialty { get; }
     public List<string> Treated { get; } = new();
 
-    public Doctor(string name, string specialty)
+    public Doctor(string name, string specialty) : base(name)
     {
-        Name = name;
         Specialty = specialty;
     }
 
