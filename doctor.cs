@@ -1,19 +1,33 @@
 using System;
 using System.Collections.Generic;
 
-class Doctor : Person
+// Абстрактний лікар. Конкретні лікарі (Therapist, Surgeon, Cardiologist) успадковують його.
+abstract class Doctor : Person
 {
-    public string Specialty { get; }
-    public List<string> Treated { get; } = new();
+    private readonly List<string> treated = new();     // приховано: змінювати можна лише через Treat
 
-    public Doctor(string name, string specialty) : base(name)
+    public Specialty Specialty { get; }
+    public IReadOnlyList<string> Treated => treated;   // назовні лише для читання
+
+    protected Doctor(string name, Specialty specialty) : base(name)
     {
         Specialty = specialty;
     }
 
-    public void Treat(Patient patient)
+    public override string Role => "Лікар (" + Specialty.ToUkrainian() + ")";
+
+    // Що саме робить лікар при прийомі: у кожного нащадка своє
+    protected abstract string Action { get; }
+
+    public bool CanTreat(Disease disease) => disease.RequiredSpecialty == Specialty;
+
+    // virtual: нащадки можуть доповнити поведінку
+    public virtual void Treat(Patient patient)
     {
-        Treated.Add(patient.Name);
-        Console.WriteLine($"Лікар {Name} ({Specialty}): прийом {patient.Name}, пріоритет {patient.Severity}");
+        treated.Add(patient.Name);
+        Console.WriteLine($"  [{Role} {Name}] {Action}: {patient.Name} ({patient.Disease.Name})");
     }
+
+    public override string Describe() =>
+        $"{base.Describe()}, прийнято пацієнтів: {treated.Count}";
 }
