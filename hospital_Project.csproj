@@ -5,4 +5,19 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Тести бачать internal-класи проєкту (усі класи тут без public) -->
+    <InternalsVisibleTo Include="hospital_Project.Tests" />
+
+    <!-- Папка з тестами - окремий проєкт, її код не має потрапляти в основну збірку -->
+    <Compile Remove="hospital_Project.Tests/**" />
+    <None Remove="hospital_Project.Tests/**" />
+    <EmbeddedResource Remove="hospital_Project.Tests/**" />
+
+    <!-- Вхідний файл з пацієнтами копіюється поруч із .exe -->
+    <None Update="patients.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

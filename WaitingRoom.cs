@@ -24,15 +24,16 @@ class WaitingRoom : IPrintable
 
     public int PositionOf(Patient patient) => patients.IndexOf(patient) + 1;
 
-    public void Print()
+    public string Describe()
     {
         if (patients.Count == 0)
-        {
-            Console.WriteLine("Черга очікування порожня.");
-            return;
-        }
-        Console.WriteLine($"Черга очікування ({patients.Count}):");
+            return "Черга очікування порожня.";
+
+        var lines = new List<string> { $"Черга очікування ({patients.Count}):" };
         for (int i = 0; i < patients.Count; i++)
-            Console.WriteLine($"  {i + 1}. {patients[i].Describe()}");
+            lines.Add($"  {i + 1}. {patients[i].Describe()}");
+        return string.Join(Environment.NewLine, lines);
     }
+
+    public void Print() => Console.WriteLine(Describe());
 }

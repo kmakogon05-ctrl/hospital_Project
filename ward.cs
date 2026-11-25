@@ -44,11 +44,13 @@ abstract class Ward : IPrintable
         return patient;
     }
 
-    public void Print()
+    public string Describe()
     {
         string content = patients.Count > 0
             ? string.Join(", ", patients.Select(p => $"{p.Name} ({p.Disease.Name}, пріоритет {p.Severity})"))
             : "вільна";
-        Console.WriteLine($"Палата {Number} [{Type}] {patients.Count}/{Capacity}: {content}");
+        return $"Палата {Number} [{Type}] {patients.Count}/{Capacity}: {content}";
     }
+
+    public void Print() => Console.WriteLine(Describe());
 }

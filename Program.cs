@@ -1,14 +1,21 @@
 using System;
+using System.IO;
 using System.Text;
 
 class Program
 {
+    const string LogFile = "logs/hospital.log";          // журнал роботи
+    const string DefaultPatientsFile = "patients.txt";   // вхідний файл з пацієнтами
+    const string DefaultReportFile = "report.txt";       // сюди зберігається звіт
+
     static void Main()
     {
         Console.OutputEncoding = Encoding.UTF8;
         Console.InputEncoding = Encoding.UTF8;
 
-        Hospital hospital = CreateHospital();
+        ILogger logger = new FileLogger(LogFile);
+        Hospital hospital = CreateHospital(logger);
+        logger.Info("Програму запущено.");
         bool demoDone = false;
         bool running = true;
 
@@ -39,19 +46,25 @@ class Program
                         demoDone = true;
                     }
                     break;
+                case "7": LoadPatientsFromFile(hospital, logger); break;
+                case "8": SaveReport(hospital); break;
                 case "0": running = false; break;
-                default: Console.WriteLine("Невідома команда. Введіть число від 0 до 6."); break;
+                default:
+                    Console.WriteLine("Невідома команда. Введіть число від 0 до 8.");
+                    logger.Warn($"Невідома команда меню: «{choice.Trim()}».");
+                    break;
             }
             Console.WriteLine();
         }
 
+        logger.Info("Програму завершено.");
         Console.WriteLine("Роботу завершено.");
     }
 
     // Створює лікарню: 5 лікарів і 4 палати (спочатку реанімації)
-    static Hospital CreateHospital()
+    static Hospital CreateHospital(ILogger logger)
     {
-        var hospital = new Hospital();
+        var hospital = new Hospital(logger);
 
         hospital.AddDoctor(new Therapist("Петренко"));
         hospital.AddDoctor(new Therapist("Мельник"));
@@ -76,6 +89,8 @@ class Program
         Console.WriteLine("  4. Виписати пацієнта з палати");
         Console.WriteLine("  5. Звіт");
         Console.WriteLine("  6. Демо-сценарій");
+        Console.WriteLine("  7. Завантажити пацієнтів з файлу");
+        Console.WriteLine("  8. Зберегти звіт у файл");
         Console.WriteLine("  0. Вихід");
         Console.Write("Ваш вибір: ");
     }
@@ -114,6 +129,56 @@ class Program
         }
         Console.WriteLine();
         hospital.Discharge(name.Trim());
+    }
+
+    // Зчитує пацієнтів з текстового файлу й приймає кожного так само, як при ручному вводі
+    static void LoadPatientsFromFile(Hospital hospital, ILogger logger)
+    {
+        Console.Write($"Шлях до файлу [{DefaultPatientsFile}]: ");
+        string? input = Console.ReadLine();
+        string path = string.IsNullOrWhiteSpace(input) ? DefaultPatientsFile : input.Trim();
+
+        PatientImport import;
+        try
+        {
+            import = PatientFileReader.ReadFile(path);
+        }
+        catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException || ex is ArgumentException || ex is NotSupportedException)
+        {
+            Console.WriteLine("Не вдалося прочитати файл: " + ex.Message);
+            logger.Error($"Не вдалося прочитати файл «{path}»: {ex.Message}");
+            return;
+        }
+
+        logger.Info($"Прочитано файл «{path}»: пацієнтів {import.Entries.Count}, помилкових рядків {import.Errors.Count}.");
+
+        foreach (string error in import.Errors)
+        {
+            Console.WriteLine("Пропущено. " + error);
+            logger.Warn($"Файл «{path}». {error}");
+        }
+
+        foreach (PatientEntry entry in import.Entries)
+        {
+            Console.WriteLine($">>> {entry.Name}: {entry.Disease}");
+            Console.WriteLine(hospital.Admit(entry.Name, entry.Disease).Message);
+            Console.WriteLine();
+        }
+
+        Console.WriteLine($"З файлу оброблено пацієнтів: {import.Entries.Count}, пропущено рядків: {import.Errors.Count}.");
+    }
+
+    // Записує поточний звіт у текстовий файл
+    static void SaveReport(Hospital hospital)
+    {
+        Console.Write($"Шлях до файлу [{DefaultReportFile}]: ");
+        string? input = Console.ReadLine();
+        string path = string.IsNullOrWhiteSpace(input) ? DefaultReportFile : input.Trim();
+
+        if (hospital.SaveReport(path))
+            Console.WriteLine($"Звіт збережено: {Path.GetFullPath(path)}");
+        else
+            Console.WriteLine("Не вдалося зберегти звіт (подробиці в журналі).");
     }
 
     // Читає число в межах [min, max], поки користувач не введе правильно

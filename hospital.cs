@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 // Лікарня: об'єднує палати, лікарів і чергу очікування та ухвалює рішення,
 // чи можна прийняти пацієнта.
@@ -11,6 +12,13 @@ class Hospital
     private readonly WaitingRoom waiting = new();
     private readonly HashSet<string> inHospital = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<string> discharged = new();
+    private readonly ILogger log;
+
+    // Логер передається ззовні (залежність), за замовчуванням логування вимкнене
+    public Hospital(ILogger? logger = null)
+    {
+        log = logger ?? new NullLogger();
+    }
 
     public void AddWard(Ward ward) => wards.Add(ward);
     public void AddDoctor(Doctor doctor) => doctors.Add(doctor);
@@ -26,12 +34,25 @@ class Hospital
         }
         catch (ArgumentException ex)
         {
+            log.Warn($"Пацієнта не створено (ім'я «{name}»): {ex.Message}");
             return new AdmissionResult(AdmissionStatus.Rejected, "НЕ МОЖНА прийняти: " + ex.Message);
         }
         return Admit(patient);
     }
 
     public AdmissionResult Admit(Patient patient)
+    {
+        AdmissionResult result = AdmitCore(patient);
+
+        string entry = $"Прийом «{patient.Name}» ({patient.Disease.Name}, пріоритет {patient.Severity}): {result.Status}. {result.Message}";
+        if (result.Status == AdmissionStatus.Rejected) log.Warn(entry);
+        else log.Info(entry);
+
+        return result;
+    }
+
+    // Сама логіка прийому (без логування)
+    private AdmissionResult AdmitCore(Patient patient)
     {
         // 1. Перевірки: чи взагалі можна прийняти
         if (inHospital.Contains(patient.Name))
@@ -101,6 +122,7 @@ class Hospital
             inHospital.Remove(patient.Name);
             discharged.Add(patient.Name);
             Console.WriteLine($"Виписано: {patient.Name} із палати {ward.Number}. Місце звільнилось.");
+            log.Info($"Виписано «{patient.Name}» із палати {ward.Number}.");
 
             // На звільнене місце йде найтерміновіший із черги, кого ця палата може прийняти
             Patient? next = waiting.FindFor(ward);
@@ -110,6 +132,7 @@ class Hospital
                 ward.TryAdmit(next);
                 Console.WriteLine($"З черги на це місце переведено: {next.Name} " +
                                   $"({next.Disease.Name}, пріоритет {next.Severity}) -> палата {ward.Number}.");
+                log.Info($"З черги переведено «{next.Name}» у палату {ward.Number}.");
                 StartTreatment(next);
             }
             else
@@ -123,6 +146,7 @@ class Hospital
             Console.WriteLine($"«{name}» ще чекає в черзі й не лежить у палаті, виписувати нікого.");
         else
             Console.WriteLine($"Пацієнта «{name}» немає в палатах.");
+        log.Warn($"Спроба виписати «{name}», якого немає в палатах.");
         return false;
     }
 
@@ -136,14 +160,42 @@ class Hospital
 
     public void PrintWaiting() => waiting.Print();
 
-    public void PrintReport()
+    public void PrintReport() => Console.Write(BuildReport());
+
+    // Звіт збирається в рядок, щоб його можна було і вивести в консоль, і записати у файл
+    public string BuildReport()
     {
-        Console.WriteLine("=== Звіт ===");
-        PrintWards();
-        waiting.Print();
-        Console.WriteLine("Лікарі:");
-        PrintAll(doctors);
-        Console.WriteLine("Виписано: " + (discharged.Count > 0 ? string.Join(", ", discharged) : "ніхто"));
+        var sb = new StringBuilder();
+        sb.AppendLine("=== Звіт ===");
+        sb.AppendLine("Палати:");
+        foreach (Ward ward in wards)
+            sb.AppendLine(ward.Describe());
+        sb.AppendLine(waiting.Describe());
+        sb.AppendLine("Лікарі:");
+        foreach (Doctor doctor in doctors)
+            sb.AppendLine(doctor.Describe());
+        sb.AppendLine("Виписано: " + (discharged.Count > 0 ? string.Join(", ", discharged) : "ніхто"));
+        return sb.ToString();
+    }
+
+    // Записує звіт у текстовий файл. Повертає false, якщо записати не вдалося.
+    public bool SaveReport(string path)
+    {
+        try
+        {
+            string? directory = Path.GetDirectoryName(Path.GetFullPath(path));
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
+
+            File.WriteAllText(path, BuildReport(), Encoding.UTF8);
+            log.Info($"Звіт збережено у файл «{path}».");
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException || ex is ArgumentException || ex is NotSupportedException)
+        {
+            log.Error($"Не вдалося зберегти звіт у «{path}»: {ex.Message}");
+            return false;
+        }
     }
 
     // Приймає будь-які об'єкти, що реалізують IPrintable: палати, лікарів...
